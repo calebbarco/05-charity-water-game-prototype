@@ -67,9 +67,11 @@ body {
     gap: 14px;
     border: 0;
     border-radius: 8px;
+    color: #1a1a1a;
     font: inherit;
     font-size: 1.05rem;
     font-weight: 700;
+    text-decoration: none;
 }
 
 .start-button {
