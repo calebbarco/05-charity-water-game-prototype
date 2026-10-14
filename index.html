@@ -3,11 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charity Water Game</title>
+    <meta name="theme-color" content="#fffdf5">
+    <title>charity: water</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the Charity Water Game Prototype</h1>
+    <header class="site-header">
+        <h1 class="wordmark">charity<span>:</span> water</h1>
+    </header>
+
+    <main class="home-screen">
+        <div class="image-space">
+            <img class="title-image" src="img/game_title_image.png" alt="Water Dig! illustration with a well digger and community">
+        </div>
+
+        <nav class="menu" aria-label="Main menu">
+            <button class="menu-button start-button" type="button">
+                Start digging <span class="arrow" aria-hidden="true">&rarr;</span>
+            </button>
+            <button class="menu-button leaderboard-button" type="button" disabled>
+                Leaderboard <span class="coming-soon">Coming soon</span>
+            </button>
+            <div class="secondary-actions">
+                <button class="menu-button secondary-button" type="button">Why we dig</button>
+                <button class="menu-button secondary-button" type="button">Donate</button>
+            </div>
+        </nav>
+    </main>
+
     <script src="script.js"></script>
 </body>
 </html>

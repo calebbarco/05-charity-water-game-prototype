@@ -1,15 +1,146 @@
-/* Charity: water Brand Colors
+:root {
+    color-scheme: light;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1a1a1a;
+    background: #fffdf5;
+    font-synthesis: none;
+}
 
-Primary Colors:
-- Yellow:     #FFC907
-- Blue:       #2E9DF7
+* {
+    box-sizing: border-box;
+}
 
-Secondary Colors:
-- Light Blue: #8BD1CB
-- Green:      #4FCB53
-- Orange:     #FF902A
-- Red:        #F5402C
-- Dark Green: #159A48
-- Pink:       #F16061
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0 5%;
+}
 
-*/
+.site-header {
+    padding: 30px 0;
+}
+
+.wordmark {
+    margin: 0;
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    font-weight: 800;
+    letter-spacing: -0.07em;
+}
+
+.wordmark span {
+    color: #ffc907;
+}
+
+.home-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(260px, 0.72fr);
+    align-items: center;
+    gap: clamp(24px, 4vw, 64px);
+    max-width: 1400px;
+    min-height: calc(100vh - 110px);
+    margin: 0 auto;
+    padding: 0 0 56px;
+}
+
+.image-space {
+    min-height: 380px;
+}
+
+.title-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.menu-button {
+    display: flex;
+    min-height: 58px;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.start-button {
+    justify-content: space-between;
+    padding: 0 22px;
+    background: #ffc907;
+    cursor: pointer;
+}
+
+.start-button:hover {
+    background: #f2bd00;
+}
+
+.arrow {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.leaderboard-button {
+    position: relative;
+    padding: 0 18px;
+    background: #f1eee4;
+    color: #68645b;
+    cursor: not-allowed;
+}
+
+.coming-soon {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.secondary-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.secondary-button {
+    padding: 0 12px;
+    background: #2e9df7;
+    color: #fff;
+    cursor: pointer;
+}
+
+.secondary-button:hover {
+    background: #1689e5;
+}
+
+.menu-button:focus-visible {
+    outline: 3px solid #1a1a1a;
+    outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+    body {
+        padding: 0 6%;
+    }
+
+    .site-header {
+        padding: 24px 0 12px;
+    }
+
+    .home-screen {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        min-height: auto;
+        padding: 0 0 40px;
+    }
+
+    .image-space {
+        min-height: min(48vh, 420px);
+    }
+}
