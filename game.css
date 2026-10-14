@@ -495,40 +495,303 @@
 }
 
 @media (max-width: 850px) {
+    .game-page {
+        display: flex;
+        height: 100dvh;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .game-header {
+        flex: 0 0 auto;
+        padding: 8px 0;
+    }
+
+    .game-header .wordmark img {
+        width: 96px;
+    }
+
     .game-layout {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 16px;
+        min-height: 0;
+        flex: 1 1 auto;
+        grid-template-columns: minmax(0, 1.6fr) minmax(200px, 0.9fr);
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 8px;
+    }
+
+    .game-stage {
+        width: min(100%, 75dvh);
+        aspect-ratio: 3 / 2;
+    }
+
+    .game-message {
+        margin-top: 6px;
+        font-size: 0.8rem;
     }
 
     .game-sidebar {
+        gap: 8px;
+    }
+
+    .stats-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .stat-card {
+        min-height: 48px;
+        gap: 4px;
+        padding: 6px 8px;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+
+    .lives-value,
+    .points-boost-value {
+        font-size: 0.85rem;
+    }
+
+    .depth-gauge {
+        height: 32px;
+    }
+
+    .controls-panel {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        align-items: start;
+        grid-template-columns: minmax(100px, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        align-items: center;
+        gap: 6px;
+        padding: 10px;
+    }
+
+    .controls-panel h2 {
+        grid-column: 1 / -1;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .controls-panel > p,
+    .controls-panel .keyboard-hint {
+        display: none;
+    }
+
+    .direction-pad {
+        width: 102px;
+        grid-area: 2 / 1;
+        grid-template: repeat(3, 30px) / repeat(3, 30px);
+        gap: 3px;
+        margin: 0 auto;
+    }
+
+    .control-button {
+        font-size: 1.1rem;
+    }
+
+    .dig-button {
+        grid-area: 2 / 2;
+        min-height: 44px;
+        align-self: center;
+    }
+}
+
+@media (max-width: 850px) and (max-height: 600px) {
+    .game-header {
+        padding: 3px 0;
+    }
+
+    .game-header .wordmark img {
+        width: 72px;
+    }
+
+    .game-stage {
+        width: min(100%, 57dvh);
+    }
+
+    .game-sidebar {
+        gap: 5px;
+    }
+
+    .stats-panel {
+        gap: 3px;
+    }
+
+    .stat-card {
+        min-height: 38px;
+        padding: 3px 6px;
+    }
+
+    .controls-panel {
+        gap: 3px;
+        padding: 5px;
     }
 }
 
 @media (max-width: 560px) {
     .game-page {
+        display: flex;
+        height: 100dvh;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
         padding: 0 4%;
     }
 
     .game-header {
-        padding: 16px 0;
+        flex: 0 0 auto;
+        padding: 6px 0;
+    }
+
+    .game-header .wordmark img {
+        width: 78px;
     }
 
     .game-title {
         font-size: 0.95rem;
     }
 
+    .game-layout {
+        display: grid;
+        min-height: 0;
+        flex: 1 1 auto;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-content: start;
+        gap: 6px;
+        padding-bottom: 4px;
+    }
+
+    .play-area {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: auto auto;
+        gap: 3px;
+    }
+
+    .game-stage {
+        width: 100%;
+        height: min(34dvh, 240px);
+        aspect-ratio: auto;
+        justify-self: center;
+    }
+
+    .game-message {
+        min-height: 1.15em;
+        overflow: hidden;
+        margin: 0;
+        font-size: 0.75rem;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .game-sidebar {
+        display: grid;
         grid-template-columns: 1fr;
+        gap: 6px;
     }
 
     .stats-panel {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
     }
 
-    .stats-panel .stat-card:first-child {
+    .stat-card {
+        min-height: 38px;
+        gap: 4px;
+        padding: 4px 7px;
+    }
+
+    .stat-label {
+        font-size: 0.72rem;
+    }
+
+    .stat-value {
+        font-size: 0.95rem;
+    }
+
+    .lives-value,
+    .points-boost-value {
+        font-size: 0.8rem;
+    }
+
+    .depth-reading {
+        gap: 5px;
+    }
+
+    .depth-gauge {
+        width: 12px;
+        height: 27px;
+    }
+
+    .controls-panel {
+        display: grid;
+        grid-template-columns: minmax(112px, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        align-items: center;
+        gap: 4px 8px;
+        padding: 6px 8px;
+    }
+
+    .controls-panel h2 {
         grid-column: 1 / -1;
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    .controls-panel > p {
+        display: none;
+    }
+
+    .direction-pad {
+        width: 114px;
+        grid-area: 2 / 1;
+        grid-template: repeat(3, 34px) / repeat(3, 34px);
+        gap: 3px;
+        margin: 0 auto;
+    }
+
+    .control-button {
+        font-size: 1.15rem;
+    }
+
+    .dig-button {
+        grid-area: 2 / 2;
+        min-height: 44px;
+        align-self: center;
+    }
+
+    .controls-panel .keyboard-hint {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) and (max-height: 620px) {
+    .game-stage {
+        height: min(30dvh, 180px);
+    }
+
+    .game-header {
+        padding: 3px 0;
+    }
+
+    .game-header .wordmark img {
+        width: 66px;
+    }
+
+    .controls-panel {
+        padding: 4px 8px;
+    }
+
+    .direction-pad {
+        grid-template: repeat(3, 30px) / repeat(3, 30px);
+        width: 100px;
     }
 }
