@@ -28,6 +28,7 @@ const endMessage = document.querySelector('#end-message');
 const gameStage = document.querySelector('.game-stage');
 const movingWaterCan = document.querySelector('#moving-water-can');
 const donationNotice = document.querySelector('#donation-notice');
+const gameAlert = document.querySelector('#game-alert');
 
 const worldTiles = new Map();
 const tileElements = [];
@@ -56,6 +57,7 @@ let waterCanSegmentTime = 0;
 let waterCanIsActive = true;
 let waterCanRespawnTimeout;
 let donationNoticeTimeout;
+let gameAlertTimeout;
 let invulnerabilityTimeout;
 let ghostTimer;
 let gameTimer;
@@ -271,6 +273,15 @@ function showDonationNotice() {
     }, 2500);
 }
 
+function showGameAlert(text) {
+    gameAlert.textContent = text;
+    gameAlert.hidden = false;
+    window.clearTimeout(gameAlertTimeout);
+    gameAlertTimeout = window.setTimeout(() => {
+        gameAlert.hidden = true;
+    }, 3000);
+}
+
 function moveWaterCan(frameTime) {
     if (gameIsOver || !waterCanIsActive) {
         return;
@@ -443,9 +454,11 @@ function dig() {
         targetTile.type = 'air';
         message.textContent = `Clean water found! +${targetTile.gallons} gallons.`;
     } else if (targetTile.type === 'dirty-water') {
-        score = Math.max(0, score - 100);
+        const pointsLost = Math.min(score, 100);
+        score -= pointsLost;
         targetTile.type = 'air';
-        message.textContent = 'Dirty water pocket! You lost 100 points.';
+        message.textContent = `Dirty water pocket! You lost ${pointsLost} points.`;
+        showGameAlert(`Dirty water! Your score went down by ${pointsLost} points.`);
     } else {
         targetTile.type = 'air';
         score += isDoublePointsActive ? 20 : 10;
@@ -554,6 +567,7 @@ function finishGame(completed, reason = '') {
     window.cancelAnimationFrame(waterCanAnimationFrame);
     window.clearTimeout(waterCanRespawnTimeout);
     window.clearTimeout(donationNoticeTimeout);
+    window.clearTimeout(gameAlertTimeout);
 
     if (completed) {
         const depthInFeet = deepestRow * FEET_PER_TILE;
@@ -575,6 +589,7 @@ function resetGame() {
     window.cancelAnimationFrame(waterCanAnimationFrame);
     window.clearTimeout(waterCanRespawnTimeout);
     window.clearTimeout(donationNoticeTimeout);
+    window.clearTimeout(gameAlertTimeout);
     window.clearTimeout(invulnerabilityTimeout);
 
     worldTiles.clear();
@@ -603,6 +618,7 @@ function resetGame() {
 
     overlay.hidden = true;
     donationNotice.hidden = true;
+    gameAlert.hidden = true;
     movingWaterCan.hidden = false;
     message.textContent = 'You have one minute. Dig to collect clean water, then return to the surface!';
     drawBoard();

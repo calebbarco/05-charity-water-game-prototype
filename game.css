@@ -103,7 +103,29 @@
     white-space: nowrap;
 }
 
+.game-alert {
+    position: absolute;
+    z-index: 4;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 24px);
+    margin: 0;
+    padding: 10px 16px;
+    border: 2px solid var(--cw-rust);
+    border-radius: 8px;
+    background: var(--cw-cream);
+    color: var(--cw-charcoal);
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 3px 8px rgb(26 26 26 / 20%);
+}
+
 .donation-notice[hidden] {
+    display: none;
+}
+
+.game-alert[hidden] {
     display: none;
 }
 
