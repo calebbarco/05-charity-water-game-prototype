@@ -16,6 +16,11 @@
     text-decoration: none;
 }
 
+.game-header .wordmark img,
+.success-header .wordmark img {
+    width: clamp(115px, 13vw, 160px);
+}
+
 .game-title {
     color: #68645b;
     font-size: 1.1rem;
@@ -55,6 +60,40 @@
     border-radius: 12px;
     background: #8bd1cb;
     box-shadow: 0 8px 0 rgb(26 26 26 / 12%);
+}
+
+.moving-water-can {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    width: clamp(26px, 4vw, 42px);
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+}
+
+.donation-notice {
+    position: absolute;
+    z-index: 4;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 10px 16px;
+    border: 2px solid #159a48;
+    border-radius: 8px;
+    background: #fffdf5;
+    color: #126f37;
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 3px 8px rgb(26 26 26 / 20%);
+    white-space: nowrap;
+}
+
+.donation-notice[hidden] {
+    display: none;
 }
 
 .game-board {

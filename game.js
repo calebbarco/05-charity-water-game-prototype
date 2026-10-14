@@ -1,8 +1,13 @@
 const ROWS = 12;
 const COLUMNS = 18;
-const MAX_DEPTH = 50;
+const MAX_DEPTH_FEET = 1000;
+const METERS_PER_FOOT = 0.3048;
+const MAX_DEPTH_METERS = MAX_DEPTH_FEET * METERS_PER_FOOT;
 const GHOST_STEP_DELAY = 800;
 const DOUBLE_POINTS_DURATION = 10000;
+const WATER_CAN_SPEED = 180;
+const WATER_CAN_RESPAWN_DELAY = 10000;
+const DONATION_POINTS = 1000;
 const DIRECTIONS = {
     up: { row: -1, column: 0 },
     down: { row: 1, column: 0 },
@@ -21,6 +26,9 @@ const message = document.querySelector('#game-message');
 const overlay = document.querySelector('#game-overlay');
 const endTitle = document.querySelector('#end-title');
 const endMessage = document.querySelector('#end-message');
+const gameStage = document.querySelector('.game-stage');
+const movingWaterCan = document.querySelector('#moving-water-can');
+const donationNotice = document.querySelector('#donation-notice');
 
 const terrain = [];
 const tileElements = [];
@@ -33,6 +41,16 @@ let gameIsOver = false;
 let isInvulnerable = false;
 let playerHasStarted = false;
 let doublePointsUntil = 0;
+let waterCanX = 0;
+let waterCanY = 0;
+let previousWaterCanFrame = null;
+let waterCanAnimationFrame;
+let waterCanPath = [];
+let waterCanSegment = 0;
+let waterCanSegmentTime = 0;
+let waterCanIsActive = true;
+let waterCanRespawnTimeout;
+let donationNoticeTimeout;
 
 function createGhosts() {
     return [
@@ -123,7 +141,8 @@ function drawBoard() {
 }
 
 function updateStats() {
-    const depth = Math.min(MAX_DEPTH, Math.max(0, (player.row - 1) * 5));
+    const depthProgress = Math.min(1, Math.max(0, (player.row - 1) / (ROWS - 2)));
+    const depth = Math.round(depthProgress * MAX_DEPTH_METERS);
     const livesDisplay = `${'♥ '.repeat(lives).trim()}${'♡ '.repeat(3 - lives).trim()}`.trim();
     const boostSeconds = Math.max(0, Math.ceil((doublePointsUntil - Date.now()) / 1000));
 
@@ -132,8 +151,174 @@ function updateStats() {
     pointsBoostValue.textContent = boostSeconds > 0 ? `2× active · ${boostSeconds}s` : '2× inactive';
     pointsBoostValue.classList.toggle('is-active', boostSeconds > 0);
     depthValue.textContent = `${depth} m`;
-    depthFill.style.height = `${(depth / MAX_DEPTH) * 100}%`;
+    depthFill.style.height = `${depthProgress * 100}%`;
     depthGauge.setAttribute('aria-valuenow', depth);
+}
+
+function getRandomWaterCanPoint() {
+    const canWidth = movingWaterCan.offsetWidth;
+    const canHeight = movingWaterCan.offsetHeight;
+
+    return {
+        x: Math.random() * Math.max(0, gameStage.clientWidth - canWidth),
+        y: Math.random() * Math.max(0, gameStage.clientHeight - canHeight)
+    };
+}
+
+function createWaterCanPath() {
+    const canWidth = movingWaterCan.offsetWidth;
+    const canHeight = movingWaterCan.offsetHeight;
+    const stageWidth = gameStage.clientWidth;
+    const stageHeight = gameStage.clientHeight;
+    const startPoint = waterCanPath.length === 0
+        ? {
+            x: Math.random() < 0.5 ? 0 : Math.max(0, stageWidth - canWidth),
+            y: tileElements[0][0].offsetTop + (tileElements[0][0].clientHeight - canHeight) / 2
+        }
+        : getRandomWaterCanPoint();
+    const path = [startPoint];
+    const maneuvers = 2 + Math.floor(Math.random() * 3);
+
+    for (let maneuver = 0; maneuver < maneuvers; maneuver += 1) {
+        const center = getRandomWaterCanPoint();
+        const radiusX = Math.min(stageWidth * 0.22, 80 + Math.random() * 100);
+        const radiusY = Math.min(stageHeight * 0.2, 45 + Math.random() * 75);
+        const makesLoop = Math.random() < 0.5;
+        const pointCount = makesLoop ? 5 : 3;
+        const startAngle = Math.random() * Math.PI * 2;
+        const turnDirection = Math.random() < 0.5 ? 1 : -1;
+
+        for (let point = 0; point < pointCount; point += 1) {
+            const angle = startAngle + (point / (pointCount - 1)) * Math.PI * 2 * turnDirection;
+            path.push({
+                x: Math.max(-canWidth, Math.min(stageWidth, center.x + Math.cos(angle) * radiusX)),
+                y: Math.max(-canHeight, Math.min(stageHeight, center.y + Math.sin(angle) * radiusY))
+            });
+        }
+    }
+
+    const exitSide = Math.floor(Math.random() * 4);
+    const exitPoint = {
+        x: exitSide === 1 ? stageWidth + canWidth : exitSide === 3 ? -canWidth : Math.random() * stageWidth,
+        y: exitSide === 0 ? -canHeight : exitSide === 2 ? stageHeight + canHeight : Math.random() * stageHeight
+    };
+
+    path.push(exitPoint);
+    waterCanPath = path;
+    waterCanSegment = 0;
+    waterCanSegmentTime = 0;
+    waterCanX = startPoint.x;
+    waterCanY = startPoint.y;
+    previousWaterCanFrame = null;
+}
+
+function showWaterCan() {
+    if (gameIsOver) {
+        return;
+    }
+
+    waterCanIsActive = true;
+    movingWaterCan.hidden = false;
+    createWaterCanPath();
+    waterCanAnimationFrame = window.requestAnimationFrame(moveWaterCan);
+}
+
+function hideWaterCanUntilRespawn() {
+    waterCanIsActive = false;
+    movingWaterCan.hidden = true;
+    window.clearTimeout(waterCanRespawnTimeout);
+    waterCanRespawnTimeout = window.setTimeout(showWaterCan, WATER_CAN_RESPAWN_DELAY);
+}
+
+function showDonationNotice() {
+    donationNotice.hidden = false;
+    window.clearTimeout(donationNoticeTimeout);
+    donationNoticeTimeout = window.setTimeout(() => {
+        donationNotice.hidden = true;
+    }, 2500);
+}
+
+function moveWaterCan(frameTime) {
+    if (gameIsOver || !waterCanIsActive) {
+        return;
+    }
+
+    const elapsedSeconds = previousWaterCanFrame === null
+        ? 0
+        : Math.min((frameTime - previousWaterCanFrame) / 1000, 0.05);
+    previousWaterCanFrame = frameTime;
+
+    const canHeight = movingWaterCan.offsetHeight;
+    let distanceToTravel = WATER_CAN_SPEED * elapsedSeconds;
+
+    while (distanceToTravel > 0 && waterCanSegment < waterCanPath.length - 1) {
+        const start = waterCanPath[waterCanSegment];
+        const end = waterCanPath[waterCanSegment + 1];
+        const segmentLength = Math.hypot(end.x - start.x, end.y - start.y);
+        const segmentDuration = segmentLength / WATER_CAN_SPEED;
+        const remainingSegmentTime = segmentDuration - waterCanSegmentTime;
+        const elapsedSegmentTime = Math.min(distanceToTravel / WATER_CAN_SPEED, remainingSegmentTime);
+
+        waterCanSegmentTime += elapsedSegmentTime;
+        distanceToTravel -= elapsedSegmentTime * WATER_CAN_SPEED;
+
+        const progress = segmentDuration === 0 ? 1 : waterCanSegmentTime / segmentDuration;
+        const pointBefore = waterCanPath[Math.max(0, waterCanSegment - 1)];
+        const pointAfter = waterCanPath[Math.min(waterCanPath.length - 1, waterCanSegment + 2)];
+        const tSquared = progress * progress;
+        const tCubed = tSquared * progress;
+
+        waterCanX = 0.5 * (
+            2 * start.x
+            + (-pointBefore.x + end.x) * progress
+            + (2 * pointBefore.x - 5 * start.x + 4 * end.x - pointAfter.x) * tSquared
+            + (-pointBefore.x + 3 * start.x - 3 * end.x + pointAfter.x) * tCubed
+        );
+        waterCanY = 0.5 * (
+            2 * start.y
+            + (-pointBefore.y + end.y) * progress
+            + (2 * pointBefore.y - 5 * start.y + 4 * end.y - pointAfter.y) * tSquared
+            + (-pointBefore.y + 3 * start.y - 3 * end.y + pointAfter.y) * tCubed
+        );
+
+        if (waterCanSegmentTime >= segmentDuration) {
+            waterCanSegment += 1;
+            waterCanSegmentTime = 0;
+        }
+    }
+
+    movingWaterCan.style.transform = `translate3d(${waterCanX}px, ${waterCanY}px, 0)`;
+
+    const playerAvatar = tileElements[player.row][player.column].querySelector('.miner-avatar');
+
+    if (playerAvatar) {
+        const canRect = movingWaterCan.getBoundingClientRect();
+        const playerRect = playerAvatar.getBoundingClientRect();
+        const touchedPlayer = canRect.left < playerRect.right
+            && canRect.right > playerRect.left
+            && canRect.top < playerRect.bottom
+            && canRect.bottom > playerRect.top;
+
+        if (touchedPlayer) {
+            score += DONATION_POINTS;
+            updateStats();
+            showDonationNotice();
+            hideWaterCanUntilRespawn();
+            return;
+        }
+    }
+
+    const hasLeftStage = waterCanX + movingWaterCan.offsetWidth < 0
+        || waterCanX > gameStage.clientWidth
+        || waterCanY + canHeight < 0
+        || waterCanY > gameStage.clientHeight;
+
+    if (hasLeftStage || waterCanSegment >= waterCanPath.length - 1) {
+        hideWaterCanUntilRespawn();
+        return;
+    }
+
+    waterCanAnimationFrame = window.requestAnimationFrame(moveWaterCan);
 }
 
 function isInsideBoard(row, column) {
@@ -336,11 +521,14 @@ function loseLife() {
 function finishGame(foundWater) {
     gameIsOver = true;
     window.clearInterval(ghostTimer);
+    window.cancelAnimationFrame(waterCanAnimationFrame);
+    window.clearTimeout(waterCanRespawnTimeout);
+    window.clearTimeout(donationNoticeTimeout);
 
     if (foundWater) {
         score += 100;
-        const depthInMeters = Math.min(MAX_DEPTH, Math.max(0, (player.row - 1) * 5));
-        const depthInFeet = Math.round(depthInMeters * 3.28084);
+        const depthProgress = Math.min(1, Math.max(0, (player.row - 1) / (ROWS - 2)));
+        const depthInFeet = Math.round(depthProgress * MAX_DEPTH_FEET);
         const peopleHelped = Math.round(score * 10.21);
 
         window.location.href = `success.html?depth=${depthInFeet}&people=${peopleHelped}&score=${score}`;
@@ -378,4 +566,6 @@ document.querySelector('#dig-button').addEventListener('click', dig);
 
 createTerrain();
 drawBoard();
+createWaterCanPath();
 const ghostTimer = window.setInterval(moveGhosts, GHOST_STEP_DELAY);
+waterCanAnimationFrame = window.requestAnimationFrame(moveWaterCan);

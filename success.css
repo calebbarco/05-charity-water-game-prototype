@@ -12,6 +12,10 @@
     text-decoration: none;
 }
 
+.success-header .wordmark img {
+    width: clamp(115px, 13vw, 160px);
+}
+
 .success-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);

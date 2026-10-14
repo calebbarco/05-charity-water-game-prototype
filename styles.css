@@ -22,13 +22,22 @@ body {
 
 .wordmark {
     margin: 0;
-    font-size: clamp(1.7rem, 3vw, 2.3rem);
-    font-weight: 800;
-    letter-spacing: -0.07em;
+    line-height: 0;
 }
 
-.wordmark span {
-    color: #ffc907;
+.wordmark img {
+    display: block;
+    width: clamp(130px, 16vw, 190px);
+    height: auto;
+}
+
+.donate-button img {
+    display: block;
+    width: min(56%, 116px);
+    height: auto;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: #fff;
 }
 
 .home-screen {

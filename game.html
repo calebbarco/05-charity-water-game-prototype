@@ -10,7 +10,9 @@
 </head>
 <body class="game-page">
     <header class="site-header game-header">
-        <a class="wordmark" href="index.html">charity<span>:</span> water</a>
+        <a class="wordmark" href="index.html">
+            <img src="img/cw_logo.png" alt="charity: water home">
+        </a>
         <span class="game-title">Water Dig!</span>
     </header>
 
@@ -19,6 +21,10 @@
             <h1 id="game-heading" class="visually-hidden">Dig for water</h1>
             <div class="game-stage">
                 <div id="game-board" class="game-board" role="grid" aria-label="Underground digging game board"></div>
+                <img id="moving-water-can" class="moving-water-can" src="img/water-can.png" alt="Water can">
+                <p id="donation-notice" class="donation-notice" role="status" aria-live="polite" hidden>
+                    Donation received! +1,000 points
+                </p>
                 <div id="game-overlay" class="game-overlay" hidden>
                     <h2 id="end-title"></h2>
                     <p id="end-message"></p>
@@ -36,7 +42,7 @@
                 <div class="stat-card">
                     <span class="stat-label">Depth</span>
                     <div class="depth-reading">
-                        <div class="depth-gauge" role="meter" aria-label="Depth" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+                        <div class="depth-gauge" role="meter" aria-label="Depth" aria-valuemin="0" aria-valuemax="305" aria-valuenow="0">
                             <div id="depth-fill" class="depth-fill"></div>
                         </div>
                         <span id="depth-value" class="stat-value">0 m</span>
