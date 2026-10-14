@@ -54,7 +54,7 @@
 }
 
 .result-statement strong {
-    color: #159a48;
+    color: var(--cw-navy);
 }
 
 .final-score {
@@ -63,11 +63,11 @@
     gap: 6px;
     padding: 18px 20px;
     border-radius: 10px;
-    background: #f1eee4;
+    background: var(--cw-cream);
 }
 
 .final-score span {
-    color: #68645b;
+    color: var(--cw-charcoal);
     font-weight: 700;
 }
 
@@ -96,22 +96,24 @@
 }
 
 .home-button {
-    background: #2e9df7;
+    background: var(--cw-navy);
     color: #fff;
 }
 
 .home-button:hover {
-    background: #1689e5;
+    background: var(--cw-light-blue);
+    color: var(--cw-charcoal);
 }
 
 .next-level-button {
-    background: #f1eee4;
-    color: #68645b;
+    gap: 14px;
+    background: var(--cw-gray);
+    color: var(--cw-charcoal);
     cursor: not-allowed;
 }
 
 .success-page :is(a, button):focus-visible {
-    outline: 3px solid #1a1a1a;
+    outline: 3px solid var(--cw-navy);
     outline-offset: 3px;
 }
 

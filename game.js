@@ -54,7 +54,7 @@ let donationNoticeTimeout;
 
 function createGhosts() {
     return [
-        { row: 1, column: 1, color: 'pink', direction: 1, patrolStart: 1, patrolEnd: 6 },
+        { row: 1, column: 1, color: 'yellow', direction: 1, patrolStart: 1, patrolEnd: 6 },
         { row: 1, column: COLUMNS - 2, color: 'blue', direction: -1, patrolStart: 10, patrolEnd: COLUMNS - 2 }
     ];
 }
