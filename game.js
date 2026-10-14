@@ -276,13 +276,16 @@ function finishGame(foundWater) {
 
     if (foundWater) {
         score += 100;
-        endTitle.textContent = 'You found water!';
-        endMessage.textContent = `Great digging! Your final score is ${score}.`;
-    } else {
-        endTitle.textContent = 'Game over';
-        endMessage.textContent = `The ghosts caught you. Your final score is ${score}.`;
+        const depthInMeters = Math.min(MAX_DEPTH, Math.max(0, (player.row - 1) * 5));
+        const depthInFeet = Math.round(depthInMeters * 3.28084);
+        const peopleHelped = Math.max(1, Math.round(depthInFeet / 10));
+
+        window.location.href = `success.html?depth=${depthInFeet}&people=${peopleHelped}&score=${score}`;
+        return;
     }
 
+    endTitle.textContent = 'Game over';
+    endMessage.textContent = `The ghosts caught you. Your final score is ${score}.`;
     updateStats();
     overlay.hidden = false;
 }
