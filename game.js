@@ -1,6 +1,6 @@
 const ROWS = 12;
 const COLUMNS = 18;
-const GHOST_STEP_DELAY = 800;
+const GHOST_STEP_DELAY = 650;
 const DOUBLE_POINTS_DURATION = 10000;
 const WATER_CAN_SPEED = 180;
 const WATER_CAN_RESPAWN_DELAY = 10000;
@@ -56,6 +56,7 @@ let waterCanSegmentTime = 0;
 let waterCanIsActive = true;
 let waterCanRespawnTimeout;
 let donationNoticeTimeout;
+let invulnerabilityTimeout;
 let ghostTimer;
 let gameTimer;
 
@@ -80,12 +81,13 @@ function getWorldTile(row, column) {
             tile = { type: 'air' };
         } else {
             const chance = Math.random();
+            const cleanWaterChance = Math.min(0.18, 0.04 + row * 0.001);
 
             if (chance < 0.08) {
                 tile = { type: 'rock' };
-            } else if (chance < 0.12) {
+            } else if (chance < 0.08 + cleanWaterChance) {
                 tile = { type: 'clean-water', gallons: 100 + Math.floor(Math.random() * 401) };
-            } else if (chance < 0.16) {
+            } else if (chance < 0.12 + cleanWaterChance) {
                 tile = { type: 'dirty-water' };
             } else {
                 tile = { type: 'soil' };
@@ -519,21 +521,28 @@ function moveGhosts() {
     drawBoard();
 }
 
-function loseLife() {
+function loseLife(reason = 'A ghost caught you! You lost a life.', restartTimer = false) {
     lives -= 1;
 
     if (lives === 0) {
         updateStats();
-        finishGame(false, 'The ghosts caught you. Your final score is');
+        finishGame(false, `${reason} No lives remain. Your final score is`);
         return;
     }
 
     player = { row: 0, column: 0 };
     hasBeenUnderground = false;
+    ghosts = createStartingGhosts();
+    if (restartTimer) {
+        secondsRemaining = GAME_DURATION_SECONDS;
+    }
     isInvulnerable = true;
-    message.textContent = 'A ghost caught you! You lost a life. Get back to digging!';
+    const respawnMessage = restartTimer
+        ? 'You respawned at the surface with 1:00 to keep playing.'
+        : 'You respawned at the surface.';
+    message.textContent = `${reason} ${respawnMessage}`;
     drawBoard();
-    window.setTimeout(() => {
+    invulnerabilityTimeout = window.setTimeout(() => {
         isInvulnerable = false;
     }, 1800);
 }
@@ -560,6 +569,50 @@ function finishGame(completed, reason = '') {
     overlay.hidden = false;
 }
 
+function resetGame() {
+    window.clearInterval(ghostTimer);
+    window.clearInterval(gameTimer);
+    window.cancelAnimationFrame(waterCanAnimationFrame);
+    window.clearTimeout(waterCanRespawnTimeout);
+    window.clearTimeout(donationNoticeTimeout);
+    window.clearTimeout(invulnerabilityTimeout);
+
+    worldTiles.clear();
+    player = { row: 0, column: 0 };
+    playerElement = null;
+    facing = 'down';
+    ghosts = createStartingGhosts();
+    score = 0;
+    gallons = 0;
+    lives = 3;
+    gameIsOver = false;
+    isInvulnerable = false;
+    playerHasStarted = false;
+    hasBeenUnderground = false;
+    deepestRow = 0;
+    nextGhostColor = 'yellow';
+    doublePointsUntil = 0;
+    secondsRemaining = GAME_DURATION_SECONDS;
+    waterCanX = 0;
+    waterCanY = 0;
+    previousWaterCanFrame = null;
+    waterCanPath = [];
+    waterCanSegment = 0;
+    waterCanSegmentTime = 0;
+    waterCanIsActive = true;
+
+    overlay.hidden = true;
+    donationNotice.hidden = true;
+    movingWaterCan.hidden = false;
+    message.textContent = 'You have one minute. Dig to collect clean water, then return to the surface!';
+    drawBoard();
+    createWaterCanPath();
+
+    ghostTimer = window.setInterval(moveGhosts, GHOST_STEP_DELAY);
+    gameTimer = window.setInterval(countDown, 1000);
+    waterCanAnimationFrame = window.requestAnimationFrame(moveWaterCan);
+}
+
 function countDown() {
     if (gameIsOver) {
         return;
@@ -570,7 +623,7 @@ function countDown() {
 
     if (secondsRemaining <= 0) {
         secondsRemaining = 0;
-        finishGame(false, 'Time ran out. Your final score is');
+        loseLife('Time ran out! You lost a life.', true);
     }
 }
 
@@ -596,6 +649,9 @@ document.querySelectorAll('[data-direction]').forEach((button) => {
 });
 
 document.querySelector('#dig-button').addEventListener('click', dig);
+document.querySelectorAll('[data-reset-game]').forEach((button) => {
+    button.addEventListener('click', resetGame);
+});
 
 createBoard();
 drawBoard();

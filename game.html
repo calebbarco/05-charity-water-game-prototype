@@ -28,7 +28,7 @@
                 <div id="game-overlay" class="game-overlay" hidden>
                     <h2 id="end-title"></h2>
                     <p id="end-message"></p>
-                    <a class="overlay-button" href="game.html">Play again</a>
+                    <button class="overlay-button" type="button" data-reset-game>Play again</button>
                     <a class="overlay-link" href="index.html">Back to home</a>
                 </div>
             </div>
@@ -74,7 +74,11 @@
                     <button class="control-button down-control" type="button" data-direction="down" aria-label="Move down">&darr;</button>
                     <button class="control-button right-control" type="button" data-direction="right" aria-label="Move right">&rarr;</button>
                 </div>
-                <button id="dig-button" class="dig-button" type="button">Dig</button>
+                <div class="control-actions">
+                    <button id="dig-button" class="dig-button" type="button">Dig</button>
+                    <button class="reset-button" type="button" data-reset-game>Reset</button>
+                    <a class="home-control-button" href="index.html">Back to home</a>
+                </div>
                 <p class="keyboard-hint">Keyboard: arrow keys to move, Space to dig.</p>
             </section>
         </aside>
