@@ -33,7 +33,7 @@
                 </div>
             </div>
             <p id="game-message" class="game-message" role="status" aria-live="polite">
-                Use the arrow keys to move. Dig into the soil to reach the water!
+                You have one minute. Dig to collect clean water, then return to the surface!
             </p>
         </section>
 
@@ -41,20 +41,23 @@
             <section class="stats-panel" aria-label="Game stats">
                 <div class="stat-card">
                     <span class="stat-label">Depth</span>
-                    <div class="depth-reading">
-                        <div class="depth-gauge" role="meter" aria-label="Depth" aria-valuemin="0" aria-valuemax="305" aria-valuenow="0">
-                            <div id="depth-fill" class="depth-fill"></div>
-                        </div>
-                        <span id="depth-value" class="stat-value">0 m</span>
-                    </div>
+                    <span id="depth-value" class="stat-value">0 ft</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-label">Score</span>
                     <span id="score-value" class="stat-value">0</span>
                 </div>
                 <div class="stat-card">
+                    <span class="stat-label">Water collected</span>
+                    <span id="gallons-value" class="stat-value">0 gal</span>
+                </div>
+                <div class="stat-card">
                     <span class="stat-label">Lives</span>
                     <span id="lives-value" class="stat-value lives-value">♥ ♥ ♥</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Time</span>
+                    <span id="time-value" class="stat-value">1:00</span>
                 </div>
                 <div class="stat-card points-boost-card">
                     <span class="stat-label">Point boost</span>
@@ -64,7 +67,7 @@
 
             <section class="controls-panel" aria-labelledby="controls-heading">
                 <h2 id="controls-heading">Controls</h2>
-                <p>Move with the arrows. Dig in the direction you last moved to clear soil or defeat a ghost.</p>
+                <p>Dig through soil and water pockets. Return to the surface before time runs out.</p>
                 <div class="direction-pad" aria-label="Movement controls">
                     <button class="control-button up-control" type="button" data-direction="up" aria-label="Move up">&uarr;</button>
                     <button class="control-button left-control" type="button" data-direction="left" aria-label="Move left">&larr;</button>

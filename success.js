@@ -11,5 +11,6 @@ function getResultValue(name) {
 }
 
 document.querySelector('#depth-result').textContent = getResultValue('depth');
+document.querySelector('#gallons-result').textContent = getResultValue('gallons').toLocaleString();
 document.querySelector('#people-result').textContent = getResultValue('people');
 document.querySelector('#score-result').textContent = getResultValue('score');

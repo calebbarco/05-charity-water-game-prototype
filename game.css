@@ -120,6 +120,14 @@
     background: linear-gradient(#fff7e1, #77a8bb);
 }
 
+.tile-sky {
+    background: linear-gradient(#fff7e1, #77a8bb);
+}
+
+.tile-surface {
+    background: linear-gradient(to bottom, var(--cw-yellow) 0 18%, var(--cw-rust) 18%);
+}
+
 .tile-soil {
     background-color: var(--cw-rust);
     background-image:
@@ -141,19 +149,39 @@
     content: "";
 }
 
-.tile-water {
-    background: var(--cw-navy);
+.tile-clean-water {
+    background: linear-gradient(145deg, var(--cw-light-blue), #fff);
 }
 
-.tile-water::before {
+.tile-clean-water::before,
+.tile-dirty-water::before {
     position: absolute;
-    top: -14%;
-    left: -10%;
-    width: 120%;
-    height: 36%;
+    display: grid;
+    width: 60%;
+    height: 60%;
+    place-items: center;
+    border: 2px solid var(--cw-navy);
     border-radius: 50%;
-    background: var(--cw-light-blue);
+    color: var(--cw-navy);
+    font-size: clamp(0.65rem, 1.5vw, 1.2rem);
+    font-weight: 900;
     content: "";
+}
+
+.tile-clean-water::before {
+    background: #fff;
+    content: "+";
+}
+
+.tile-dirty-water {
+    background: linear-gradient(145deg, var(--cw-rust), var(--cw-yellow));
+}
+
+.tile-dirty-water::before {
+    border-color: var(--cw-charcoal);
+    background: var(--cw-cream);
+    color: var(--cw-charcoal);
+    content: "!";
 }
 
 .miner-avatar {
@@ -332,28 +360,8 @@
     color: var(--cw-navy);
 }
 
-.depth-reading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.depth-gauge {
-    display: flex;
-    width: 18px;
-    height: 48px;
-    align-items: flex-end;
-    overflow: hidden;
-    border: 2px solid var(--cw-charcoal);
-    border-radius: 9px;
-    background: var(--cw-cream);
-}
-
-.depth-fill {
-    width: 100%;
-    height: 0;
-    background: var(--cw-navy);
-    transition: height 180ms ease-out;
+.time-running-low {
+    color: var(--cw-rust);
 }
 
 .controls-panel {
@@ -560,10 +568,6 @@
         font-size: 0.85rem;
     }
 
-    .depth-gauge {
-        height: 32px;
-    }
-
     .controls-panel {
         display: grid;
         grid-template-columns: minmax(100px, 1fr) minmax(0, 1fr);
@@ -618,6 +622,19 @@
 
     .game-sidebar {
         gap: 5px;
+    }
+
+    .stat-card {
+        min-height: 38px;
+        padding: 4px 6px;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .stat-value {
+        font-size: 0.85rem;
     }
 
     .stats-panel {
@@ -721,15 +738,6 @@
     .lives-value,
     .points-boost-value {
         font-size: 0.8rem;
-    }
-
-    .depth-reading {
-        gap: 5px;
-    }
-
-    .depth-gauge {
-        width: 12px;
-        height: 27px;
     }
 
     .controls-panel {

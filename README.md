@@ -3,3 +3,7 @@
 In this project, you’ll begin transforming your game concept from last week into a working interactive prototype using HTML, CSS, and JavaScript.
 
 This first version should focus on core functionality — clickable elements, score tracking, and a basic layout. The goal is to bring your idea to life with simple, working mechanics that you’ll refine and expand in the next milestone.
+
+## Gameplay
+
+Start a round from the homepage. Use the arrow keys (or on-screen arrows) to move and Space (or the Dig button) to dig. Explore the endless underground to collect clean-water pockets, avoid dirty-water pockets and rocks, and return to the surface within one minute. The game tracks score, collected gallons, lives, time, and deepest depth reached.
