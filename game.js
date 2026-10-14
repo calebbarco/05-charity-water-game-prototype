@@ -265,15 +265,30 @@ function moveGhosts() {
 
     if (!playerHasStarted) {
         for (const ghost of ghosts) {
-            const nextColumn = ghost.column + ghost.direction;
+            let nextColumn = ghost.column + ghost.direction;
 
             if (nextColumn < ghost.patrolStart || nextColumn > ghost.patrolEnd) {
                 ghost.direction *= -1;
-                ghost.column += ghost.direction;
-                continue;
+                nextColumn = ghost.column + ghost.direction;
             }
 
-            ghost.column = nextColumn;
+            const wouldHitPlayer = ghost.row === player.row && nextColumn === player.column;
+            const wouldHitGhost = ghosts.some((otherGhost) => otherGhost !== ghost
+                && otherGhost.row === ghost.row
+                && otherGhost.column === nextColumn);
+
+            if (wouldHitPlayer || wouldHitGhost) {
+                ghost.direction *= -1;
+                nextColumn = ghost.column + ghost.direction;
+            }
+
+            if (nextColumn >= ghost.patrolStart && nextColumn <= ghost.patrolEnd
+                && nextColumn !== player.column
+                && !ghosts.some((otherGhost) => otherGhost !== ghost
+                    && otherGhost.row === ghost.row
+                    && otherGhost.column === nextColumn)) {
+                ghost.column = nextColumn;
+            }
         }
 
         drawBoard();
