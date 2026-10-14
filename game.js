@@ -2,24 +2,18 @@ const ROWS = 12;
 const COLUMNS = 18;
 const MAX_DEPTH = 50;
 const GHOST_STEP_DELAY = 800;
+const DOUBLE_POINTS_DURATION = 10000;
 const DIRECTIONS = {
     up: { row: -1, column: 0 },
     down: { row: 1, column: 0 },
     left: { row: 0, column: -1 },
     right: { row: 0, column: 1 }
 };
-const ROCK_SPOTS = [
-    [4, 3], [4, 13],
-    [5, 6], [5, 11],
-    [6, 2], [6, 14],
-    [7, 5], [7, 12],
-    [8, 3], [8, 15],
-    [9, 6], [9, 11]
-];
 
 const board = document.querySelector('#game-board');
 const scoreValue = document.querySelector('#score-value');
 const livesValue = document.querySelector('#lives-value');
+const pointsBoostValue = document.querySelector('#points-boost-value');
 const depthValue = document.querySelector('#depth-value');
 const depthGauge = document.querySelector('.depth-gauge');
 const depthFill = document.querySelector('#depth-fill');
@@ -32,14 +26,20 @@ const terrain = [];
 const tileElements = [];
 let player = { row: 1, column: 8 };
 let facing = 'down';
-let ghosts = [
-    { row: 1, column: 1, color: 'pink' },
-    { row: 1, column: COLUMNS - 2, color: 'blue' }
-];
+let ghosts = createGhosts();
 let score = 0;
 let lives = 3;
 let gameIsOver = false;
 let isInvulnerable = false;
+let playerHasStarted = false;
+let doublePointsUntil = 0;
+
+function createGhosts() {
+    return [
+        { row: 1, column: 1, color: 'pink', direction: 1, patrolStart: 1, patrolEnd: 6 },
+        { row: 1, column: COLUMNS - 2, color: 'blue', direction: -1, patrolStart: 10, patrolEnd: COLUMNS - 2 }
+    ];
+}
 
 function createTerrain() {
     for (let row = 0; row < ROWS; row += 1) {
@@ -53,8 +53,6 @@ function createTerrain() {
                 tileType = 'air';
             } else if (row === ROWS - 1) {
                 tileType = 'water';
-            } else if (ROCK_SPOTS.some(([rockRow, rockColumn]) => rockRow === row && rockColumn === column)) {
-                tileType = 'rock';
             }
 
             terrain[row][column] = tileType;
@@ -64,6 +62,28 @@ function createTerrain() {
             tile.setAttribute('role', 'gridcell');
             tileElements[row][column] = tile;
             board.append(tile);
+        }
+    }
+
+    for (let row = 2; row < ROWS - 1; row += 1) {
+        const rockCount = row > 5 ? 4 : 3;
+        const availableColumns = [];
+
+        for (let column = 0; column < COLUMNS; column += 1) {
+            if (column !== player.column) {
+                availableColumns.push(column);
+            }
+        }
+
+        for (let index = availableColumns.length - 1; index > 0; index -= 1) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [availableColumns[index], availableColumns[randomIndex]] = [availableColumns[randomIndex], availableColumns[index]];
+        }
+
+        for (let index = 0; index < rockCount; index += 1) {
+            const column = availableColumns[index];
+            terrain[row][column] = 'rock';
+            tileElements[row][column].className = 'tile tile-rock';
         }
     }
 }
@@ -105,9 +125,12 @@ function drawBoard() {
 function updateStats() {
     const depth = Math.min(MAX_DEPTH, Math.max(0, (player.row - 1) * 5));
     const livesDisplay = `${'♥ '.repeat(lives).trim()}${'♡ '.repeat(3 - lives).trim()}`.trim();
+    const boostSeconds = Math.max(0, Math.ceil((doublePointsUntil - Date.now()) / 1000));
 
     scoreValue.textContent = score;
     livesValue.textContent = livesDisplay;
+    pointsBoostValue.textContent = boostSeconds > 0 ? `2× active · ${boostSeconds}s` : '2× inactive';
+    pointsBoostValue.classList.toggle('is-active', boostSeconds > 0);
     depthValue.textContent = `${depth} m`;
     depthFill.style.height = `${(depth / MAX_DEPTH) * 100}%`;
     depthGauge.setAttribute('aria-valuenow', depth);
@@ -147,6 +170,7 @@ function movePlayer(directionName) {
         return;
     }
 
+    playerHasStarted = true;
     player = { row: nextRow, column: nextColumn };
 
     if (nextTile === 'water') {
@@ -177,10 +201,26 @@ function dig() {
         return;
     }
 
+    const ghostIndex = ghosts.findIndex((ghost) => ghost.row === targetRow && ghost.column === targetColumn);
+
+    if (ghostIndex !== -1) {
+        playerHasStarted = true;
+        ghosts.splice(ghostIndex, 1);
+        score += 20;
+        doublePointsUntil = Date.now() + DOUBLE_POINTS_DURATION;
+        message.textContent = 'Ghost defeated! Double points are active for 10 seconds!';
+        drawBoard();
+        return;
+    }
+
     if (terrain[targetRow][targetColumn] === 'soil') {
+        playerHasStarted = true;
         terrain[targetRow][targetColumn] = 'air';
-        score += 10;
-        message.textContent = 'Nice digging! Move into the cleared space.';
+        const isDoublePointsActive = Date.now() < doublePointsUntil;
+        score += isDoublePointsActive ? 20 : 10;
+        message.textContent = isDoublePointsActive
+            ? 'Double points! Nice digging. Move into the cleared space.'
+            : 'Nice digging! Move into the cleared space.';
         drawBoard();
         return;
     }
@@ -204,12 +244,6 @@ function findGhostStep(ghost) {
                 continue;
             }
 
-            const tileType = terrain[row][column];
-
-            if (tileType !== 'air' && tileType !== 'water') {
-                continue;
-            }
-
             const firstStep = current.firstStep || { row, column };
 
             if (row === player.row && column === player.column) {
@@ -229,6 +263,23 @@ function moveGhosts() {
         return;
     }
 
+    if (!playerHasStarted) {
+        for (const ghost of ghosts) {
+            const nextColumn = ghost.column + ghost.direction;
+
+            if (nextColumn < ghost.patrolStart || nextColumn > ghost.patrolEnd) {
+                ghost.direction *= -1;
+                ghost.column += ghost.direction;
+                continue;
+            }
+
+            ghost.column = nextColumn;
+        }
+
+        drawBoard();
+        return;
+    }
+
     for (const ghost of ghosts) {
         const nextStep = findGhostStep(ghost);
 
@@ -240,7 +291,7 @@ function moveGhosts() {
 
     const hasCollision = ghosts.some((ghost) => ghost.row === player.row && ghost.column === player.column);
 
-    if (hasCollision && !isInvulnerable) {
+    if (hasCollision && playerHasStarted && !isInvulnerable) {
         loseLife();
         return;
     }
@@ -258,10 +309,7 @@ function loseLife() {
     }
 
     player = { row: 1, column: 8 };
-    ghosts = [
-        { row: 1, column: 1, color: 'pink' },
-        { row: 1, column: COLUMNS - 2, color: 'blue' }
-    ];
+    ghosts = createGhosts();
     isInvulnerable = true;
     message.textContent = 'A ghost caught you! You lost a life. Get back to digging!';
     drawBoard();
@@ -278,7 +326,7 @@ function finishGame(foundWater) {
         score += 100;
         const depthInMeters = Math.min(MAX_DEPTH, Math.max(0, (player.row - 1) * 5));
         const depthInFeet = Math.round(depthInMeters * 3.28084);
-        const peopleHelped = Math.max(1, Math.round(depthInFeet / 10));
+        const peopleHelped = Math.round(score * 10.21);
 
         window.location.href = `success.html?depth=${depthInFeet}&people=${peopleHelped}&score=${score}`;
         return;

@@ -284,6 +284,15 @@
     letter-spacing: 0.06em;
 }
 
+.points-boost-value {
+    color: #68645b;
+    font-size: 1rem;
+}
+
+.points-boost-value.is-active {
+    color: #159a48;
+}
+
 .depth-reading {
     display: flex;
     align-items: center;
